@@ -721,16 +721,23 @@ https://buyee.jp/package/..."
                 if (totalSummary && totalAmount && itemCount && totalInfo) {
                     if (data.total_all > 0 || (data.consolidated && data.consolidated_total > 0)) {
                         if (data.consolidated && data.consolidated_total !== undefined) {
-                            // Show consolidated summary
-                            totalAmount.textContent = '$' + (data.consolidated_total || 0).toFixed(2);
+                            // Show consolidated summary with prominent total
+                            const consolidatedTotal = data.consolidated_total || 0;
+                            const consolidatedTotalJPY = data.consolidated_total_jpy || 0;
+                            const individualTotal = data.individual_total || 0;
+                            const savings = data.savings || 0;
+                            
+                            totalAmount.textContent = '$' + consolidatedTotal.toFixed(2);
                             itemCount.textContent = data.success_count || 0;
                             totalInfo.innerHTML = `
-                                <span class="consolidated-badge">CONSOLIDATED</span><br>
-                                <strong>Consolidated Total:</strong> $${(data.consolidated_total || 0).toFixed(2)}<br>
-                                <span style="font-size: 0.9em; opacity: 0.8;">
-                                    Individual Total: $${(data.individual_total || 0).toFixed(2)} | 
-                                    Savings: <strong class="savings-highlight">$${(data.savings || 0).toFixed(2)}</strong>
-                                </span>
+                                <span class="consolidated-badge">CONSOLIDATED PACKAGE</span><br>
+                                <div style="margin-top: 10px; font-size: 1.1em;">
+                                    <strong>Total Landed Cost:</strong> ${consolidatedTotalJPY > 0 ? consolidatedTotalJPY.toLocaleString() + ' JPY' : ''} <strong style="font-size: 1.2em;">$${consolidatedTotal.toFixed(2)}</strong>
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
+                                    Individual Total: $${individualTotal.toFixed(2)} | 
+                                    <span class="savings-highlight">Savings: $${savings.toFixed(2)}</span>
+                                </div>
                             `;
                             totalSummary.style.display = 'block';
                         } else {

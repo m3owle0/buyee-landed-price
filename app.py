@@ -366,18 +366,31 @@ def calculate_batch():
             individual_total = sum(r['total_usd'] for r in results if r.get('success'))
             savings = individual_total - consolidated_total
             
+            # Calculate consolidated total in JPY
+            consolidated_total_jpy = (
+                sum(p['landed_cost'].item_price_jpy for p in package_infos if p.get('landed_cost')) +
+                sum(p['landed_cost'].domestic_shipping_jpy for p in package_infos if p.get('landed_cost')) +
+                sum(p['landed_cost'].buyee_service_fee_jpy for p in package_infos if p.get('landed_cost')) +
+                consolidation_fee_jpy +
+                consolidated_shipping.cost_jpy +
+                (duty_usd / exchange_rate) +
+                (tax_usd / exchange_rate)
+            )
+            
             return jsonify({
                 'success': True,
                 'results': results,
                 'consolidated': True,
                 'consolidated_total': round(consolidated_total, 2) if consolidated_total else 0.0,
+                'consolidated_total_jpy': round(consolidated_total_jpy, 0) if consolidated_total_jpy else 0.0,
                 'individual_total': round(individual_total, 2) if individual_total else 0.0,
                 'savings': round(savings, 2) if savings else 0.0,
                 'consolidation_fee_usd': round(consolidation_fee_usd, 2) if consolidation_fee_usd else 0.0,
                 'consolidated_shipping_usd': round(consolidated_international_shipping_usd, 2) if consolidated_international_shipping_usd else 0.0,
                 'total_all': round(consolidated_total, 2) if consolidated_total else 0.0,
                 'count': len(results),
-                'success_count': sum(1 for r in results if r.get('success'))
+                'success_count': sum(1 for r in results if r.get('success')),
+                'exchange_rate': exchange_rate
             })
         else:
             # Calculate totals (individual shipping)
