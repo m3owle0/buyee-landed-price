@@ -385,18 +385,6 @@
             font-weight: 600;
         }
 
-        .api-config {
-            background: #fff9e6;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffa500;
-        }
-
-        .api-config input {
-            width: 100%;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -411,12 +399,6 @@
                 <strong>💡 Tip:</strong> Paste multiple Buyee links (one per line). Supports Rakuma, Mercari, Yahoo Auctions, and package links.
                 <br><strong>Example:</strong> https://buyee.jp/rakuma/item/... or https://buyee.jp/item/detail/...
                 <br><strong>Consolidation:</strong> Check "Consolidated Package Mode" to combine multiple items into one shipment and save on shipping costs!
-            </div>
-
-            <div class="api-config">
-                <strong>⚙️ Backend API URL:</strong>
-                <input type="text" id="apiUrl" placeholder="https://your-backend-url.com" value="https://backend-bp-2041.onrender.com">
-                <small style="color: #666;">Your backend API is connected. Calculations will be saved to the database automatically.</small>
             </div>
 
             <div class="input-section">
@@ -505,18 +487,9 @@ https://buyee.jp/package/..."
         const ADDRESS_STORAGE_KEY = 'buyee_saved_addresses';
         const LAST_ADDRESS_KEY = 'buyee_last_address';
         const LAST_ZIP_KEY = 'buyee_last_zip';
-        const API_URL_KEY = 'buyee_api_url';
         
-        // Load saved API URL
-        const savedApiUrl = localStorage.getItem(API_URL_KEY);
-        if (savedApiUrl) {
-            document.getElementById('apiUrl').value = savedApiUrl;
-        }
-        
-        // Save API URL when changed
-        document.getElementById('apiUrl').addEventListener('change', function() {
-            localStorage.setItem(API_URL_KEY, this.value.trim());
-        });
+        // Backend API URL (hardcoded)
+        const API_URL = 'https://backend-bp-2041.onrender.com';
 
         function loadSavedAddresses() {
             const saved = JSON.parse(localStorage.getItem(ADDRESS_STORAGE_KEY) || '[]');
@@ -592,7 +565,6 @@ https://buyee.jp/package/..."
             const consolidated = document.getElementById('consolidated').checked;
             const address = document.getElementById('address').value.trim();
             const zipcode = document.getElementById('zipcode').value.trim();
-            const apiUrl = document.getElementById('apiUrl').value.trim() || 'https://backend-bp-2041.onrender.com';
             
             if (!address || !zipcode) {
                 alert('Please enter delivery address and ZIP code');
@@ -626,7 +598,7 @@ https://buyee.jp/package/..."
             document.getElementById('results').style.display = 'none';
 
             try {
-                const response = await fetch(`${apiUrl}/calculate_batch`, {
+                const response = await fetch(`${API_URL}/calculate_batch`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
