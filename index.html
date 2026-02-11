@@ -640,20 +640,33 @@ https://buyee.jp/package/..."
                     })
                 });
 
-                const data = await response.json();
-
                 document.getElementById('loading').style.display = 'none';
+
+                // Check for rate limit before parsing JSON
+                if (response.status === 429) {
+                    const errorData = await response.json().catch(() => ({}));
+                    alert('Rate limit exceeded: ' + (errorData.message || 'Too many requests. Please wait a moment and try again.'));
+                    return;
+                }
+
+                const data = await response.json();
 
                 if (data.success) {
                     displayResults(data);
                 } else {
                     console.error('Backend error:', data);
-                    alert('Error: ' + (data.error || 'Unknown error. Please check the console for details.'));
+                    alert('Error: ' + (data.error || data.message || 'Unknown error. Please check the console for details.'));
                 }
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
                 console.error('Error calculating costs:', error);
-                alert('Error calculating costs: ' + (error.message || 'Unknown error occurred. Please check the console for details.') + '\n\nMake sure your backend API URL is correct and accessible.');
+                
+                // Check if it's a rate limit error
+                if (error.message && error.message.includes('429')) {
+                    alert('Rate limit exceeded. Please wait a moment and try again.');
+                } else {
+                    alert('Error calculating costs: ' + (error.message || 'Unknown error occurred. Please check the console for details.') + '\n\nMake sure your backend API URL is correct and accessible.');
+                }
             }
         }
 

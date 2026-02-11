@@ -5,6 +5,8 @@ Flask web application for Buyee Landed Cost Calculator
 
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from buyee_landed_cost import BuyeeLandedCostCalculator, LandedCost
 import traceback
 import os
@@ -15,6 +17,14 @@ app = Flask(__name__)
 # CORS support for GitHub Pages
 from flask_cors import CORS
 CORS(app)  # Allow requests from any origin (GitHub Pages)
+
+# Rate limiting - prevent abuse
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["100 per hour", "10 per minute"],
+    storage_uri="memory://"
+)
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -107,6 +117,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/calculate', methods=['POST'])
+@limiter.limit("20 per minute")
 def calculate():
     """Calculate landed cost for a single link"""
     try:
@@ -199,6 +210,7 @@ def calculate():
         }), 500
 
 @app.route('/calculate_batch', methods=['POST'])
+@limiter.limit("10 per minute")
 def calculate_batch():
     """Calculate landed costs for multiple links"""
     try:
@@ -538,6 +550,16 @@ def get_stats():
             'success': False,
             'error': str(e)
         }), 500
+
+# Error handler for rate limiting
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        'success': False,
+        'error': 'Rate limit exceeded',
+        'message': 'Too many requests. Please wait a moment and try again.',
+        'retry_after': str(e.description)
+    }), 429
 
 if __name__ == '__main__':
     import os
