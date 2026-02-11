@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyee Landed Cost Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .address-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        .saved-addresses {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .saved-address-btn {
+            padding: 8px 15px;
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .saved-address-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .saved-address-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .links-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: monospace;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .links-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .links-input::placeholder {
+            color: #999;
+        }
+
+        .shipping-method {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .shipping-option {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shipping-option input[type="radio"] {
+            display: none;
+        }
+
+        .shipping-option span {
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .shipping-option input[type="radio"]:checked ~ span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .shipping-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3838;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .total-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .total-summary h2 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .total-summary p {
+            opacity: 0.9;
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+        }
+
+        .result-item.error {
+            border-left-color: #ff4757;
+            background: #fff5f5;
+        }
+
+        .result-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .item-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-link {
+            font-size: 0.9em;
+            color: #666;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .cost-item.total {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .cost-label {
+            color: #666;
+        }
+
+        .cost-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cost-item.total .cost-label,
+        .cost-item.total .cost-value {
+            color: white;
+        }
+
+        .error-message {
+            color: #ff4757;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff5f5;
+            border-radius: 5px;
+        }
+
+        .help-text {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .help-text strong {
+            color: #667eea;
+        }
+
+        .consolidated-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .savings-highlight {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .api-config {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffa500;
+        }
+
+        .api-config input {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Buyee Landed Cost Calculator</h1>
+            <p>Calculate total costs for multiple Buyee items at once</p>
+        </div>
+
+        <div class="content">
+            <div class="help-text">
+                <strong>💡 Tip:</strong> Paste multiple Buyee links (one per line). Supports Rakuma, Mercari, Yahoo Auctions, and package links.
+                <br><strong>Example:</strong> https://buyee.jp/rakuma/item/... or https://buyee.jp/item/detail/...
+                <br><strong>Consolidation:</strong> Check "Consolidated Package Mode" to combine multiple items into one shipment and save on shipping costs!
+            </div>
+
+            <div class="api-config">
+                <strong>⚙️ Backend API URL:</strong> (Leave default or use your own backend)
+                <input type="text" id="apiUrl" placeholder="https://your-backend-url.com" value="">
+                <small style="color: #666;">Enter your backend API URL. Deploy your own backend using DEPLOYMENT.md or use a public demo backend.</small>
+            </div>
+
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="address">Delivery Address:</label>
+                    <div class="address-inputs">
+                        <input type="text" id="address" placeholder="Street Address, City, State" value="">
+                        <input type="text" id="zipcode" placeholder="ZIP Code" value="" maxlength="10">
+                    </div>
+                    <div class="saved-addresses" id="savedAddresses"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="links">Buyee Links (one per line):</label>
+                    <textarea 
+                        id="links" 
+                        class="links-input" 
+                        placeholder="https://buyee.jp/rakuma/item/...
+https://buyee.jp/item/detail/...
+https://buyee.jp/package/..."
+                    ></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Shipping Method:</label>
+                    <div class="shipping-method">
+                        <label class="shipping-option">
+                            <input type="radio" id="ems" name="shipping" value="EMS" checked>
+                            <span>EMS (5-7 days)</span>
+                        </label>
+                        <label class="shipping-option">
+                            <input type="radio" id="fedex-air" name="shipping" value="FedEx Air">
+                            <span>FedEx Air (3-5 days)</span>
+                        </label>
+                        <label class="shipping-option">
+                            <input type="radio" id="fedex-economy" name="shipping" value="FedEx Economy">
+                            <span>FedEx Economy (7-10 days)</span>
+                        </label>
+                        <label class="shipping-option">
+                            <input type="radio" id="dhl" name="shipping" value="DHL">
+                            <span>DHL (4-6 days)</span>
+                        </label>
+                        <label class="shipping-option">
+                            <input type="radio" id="buyee-air" name="shipping" value="Buyee Air Delivery">
+                            <span>Buyee Air Delivery (4-6 days)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="consolidated" style="width: 20px; height: 20px; cursor: pointer;">
+                        <span><strong>Consolidated Package Mode</strong> - Combine multiple items into one shipment (saves on shipping costs)</span>
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="calculateAll()">Calculate All</button>
+                    <button class="btn-secondary" onclick="clearAll()">Clear</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px;">Calculating costs...</p>
+            </div>
+
+            <div class="results-section" id="results">
+                <div class="results-header">
+                    <h2>Results</h2>
+                    <button class="btn-danger" onclick="clearResults()">Clear Results</button>
+                </div>
+
+                <div class="total-summary" id="totalSummary" style="display: none;">
+                    <h2 id="totalAmount">$0.00</h2>
+                    <p id="totalInfo">Total for <span id="itemCount">0</span> items</p>
+                </div>
+
+                <div id="resultsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Address management
+        const ADDRESS_STORAGE_KEY = 'buyee_saved_addresses';
+        const LAST_ADDRESS_KEY = 'buyee_last_address';
+        const LAST_ZIP_KEY = 'buyee_last_zip';
+
+        function loadSavedAddresses() {
+            const saved = JSON.parse(localStorage.getItem(ADDRESS_STORAGE_KEY) || '[]');
+            const savedAddressesDiv = document.getElementById('savedAddresses');
+            savedAddressesDiv.innerHTML = '';
+
+            saved.forEach((addr, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'saved-address-btn';
+                btn.textContent = `${addr.name || `Address ${index + 1}`} (${addr.zip})`;
+                btn.onclick = () => {
+                    document.getElementById('address').value = addr.address;
+                    document.getElementById('zipcode').value = addr.zip;
+                    // Highlight active
+                    document.querySelectorAll('.saved-address-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                };
+                savedAddressesDiv.appendChild(btn);
+            });
+
+            // Load last used address
+            const lastAddress = localStorage.getItem(LAST_ADDRESS_KEY);
+            const lastZip = localStorage.getItem(LAST_ZIP_KEY);
+            if (lastAddress && lastZip) {
+                document.getElementById('address').value = lastAddress;
+                document.getElementById('zipcode').value = lastZip;
+            }
+        }
+
+        function saveCurrentAddress() {
+            const address = document.getElementById('address').value.trim();
+            const zip = document.getElementById('zipcode').value.trim();
+            
+            if (!address || !zip) return;
+
+            // Save as last used
+            localStorage.setItem(LAST_ADDRESS_KEY, address);
+            localStorage.setItem(LAST_ZIP_KEY, zip);
+
+            // Check if already saved
+            const saved = JSON.parse(localStorage.getItem(ADDRESS_STORAGE_KEY) || '[]');
+            const exists = saved.some(a => a.address === address && a.zip === zip);
+            
+            if (!exists) {
+                const name = prompt('Save this address as (optional):', '');
+                saved.push({
+                    name: name || '',
+                    address: address,
+                    zip: zip
+                });
+                localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(saved));
+                loadSavedAddresses();
+            }
+        }
+
+        // Load addresses on page load
+        loadSavedAddresses();
+
+        // Auto-save address when user types
+        let addressSaveTimeout;
+        document.getElementById('address').addEventListener('input', () => {
+            clearTimeout(addressSaveTimeout);
+            addressSaveTimeout = setTimeout(saveCurrentAddress, 2000);
+        });
+        document.getElementById('zipcode').addEventListener('input', () => {
+            clearTimeout(addressSaveTimeout);
+            addressSaveTimeout = setTimeout(saveCurrentAddress, 2000);
+        });
+
+        async function calculateAll() {
+            const linksText = document.getElementById('links').value.trim();
+            const shippingMethod = document.querySelector('input[name="shipping"]:checked').value;
+            const consolidated = document.getElementById('consolidated').checked;
+            const address = document.getElementById('address').value.trim();
+            const zipcode = document.getElementById('zipcode').value.trim();
+            const apiUrl = document.getElementById('apiUrl').value.trim() || 'https://buyee-landed-cost.onrender.com';
+            
+            if (!address || !zipcode) {
+                alert('Please enter delivery address and ZIP code');
+                return;
+            }
+            
+            if (!linksText) {
+                alert('Please enter at least one Buyee link');
+                return;
+            }
+
+            const links = linksText.split('\n')
+                .map(link => link.trim())
+                .filter(link => link.length > 0 && (link.startsWith('http://') || link.startsWith('https://')));
+
+            if (links.length === 0) {
+                alert('Please enter valid Buyee links (starting with http:// or https://)');
+                return;
+            }
+
+            if (consolidated && links.length < 2) {
+                alert('Consolidated mode requires at least 2 items');
+                return;
+            }
+
+            // Save address
+            saveCurrentAddress();
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch(`${apiUrl}/calculate_batch`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        links: links,
+                        shipping_method: shippingMethod,
+                        consolidated: consolidated,
+                        destination_address: address,
+                        destination_zip: zipcode
+                    })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    console.error('Backend error:', data);
+                    alert('Error: ' + (data.error || 'Unknown error. Please check the console for details.'));
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                console.error('Error calculating costs:', error);
+                alert('Error calculating costs: ' + (error.message || 'Unknown error occurred. Please check the console for details.') + '\n\nMake sure your backend API URL is correct and accessible.');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+
+            if (data.results && data.results.length > 0) {
+                data.results.forEach((result, index) => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result-item' + (result.success ? '' : ' error');
+                    
+                    if (result.success) {
+                        resultDiv.innerHTML = `
+                            <div class="result-header-row">
+                                <div>
+                                    <div class="item-name">${result.item_name || 'Item ' + (index + 1)}</div>
+                                    <div class="item-link">${result.link}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.5em; font-weight: 600; color: #667eea;">
+                                        ${result.total_jpy ? result.total_jpy.toLocaleString() + ' JPY' : ''} $${result.total_usd.toFixed(2)}
+                                    </div>
+                                    <div style="font-size: 0.9em; color: #666;">
+                                        ${result.shipping_method}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cost-breakdown">
+                                <div class="cost-item">
+                                    <span class="cost-label">Item Price</span>
+                                    <span class="cost-value">${result.item_price_jpy ? result.item_price_jpy.toLocaleString() + ' JPY' : ''} ($${result.item_price_usd.toFixed(2)})</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Domestic Shipping</span>
+                                    <span class="cost-value">${result.domestic_shipping_jpy ? result.domestic_shipping_jpy.toLocaleString() + ' JPY' : ''} ($${result.domestic_shipping_usd.toFixed(2)})</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Buyee Service Fee</span>
+                                    <span class="cost-value">${result.buyee_service_fee_jpy ? result.buyee_service_fee_jpy.toLocaleString() + ' JPY' : ''} ($${result.buyee_service_fee_usd.toFixed(2)})</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">International Shipping</span>
+                                    <span class="cost-value">${result.international_shipping_jpy ? result.international_shipping_jpy.toLocaleString() + ' JPY' : ''} ($${result.international_shipping_usd.toFixed(2)})</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">US Customs Duty (15%)</span>
+                                    <span class="cost-value">$${result.us_customs_duty_usd.toFixed(2)}</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Processing Fee</span>
+                                    <span class="cost-value">$${result.us_customs_tax_usd.toFixed(2)}</span>
+                                </div>
+                                <div class="cost-item total">
+                                    <span class="cost-label">Total</span>
+                                    <span class="cost-value">${result.total_jpy ? result.total_jpy.toLocaleString() + ' JPY' : ''} ($${result.total_usd.toFixed(2)})</span>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 0.85em; color: #666;">
+                                Exchange Rate: 1 JPY = $${result.exchange_rate.toFixed(6)} USD (converted from JPY, not extracted)
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="item-name">Error</div>
+                            <div class="item-link">${result.link}</div>
+                            <div class="error-message">${result.error || 'Unknown error'}</div>
+                        `;
+                    }
+                    
+                    resultsList.appendChild(resultDiv);
+                });
+
+                // Show total summary
+                const totalSummary = document.getElementById('totalSummary');
+                const totalAmount = document.getElementById('totalAmount');
+                const itemCount = document.getElementById('itemCount');
+                const totalInfo = document.getElementById('totalInfo');
+                
+                if (totalSummary && totalAmount && itemCount && totalInfo) {
+                    if (data.total_all > 0 || (data.consolidated && data.consolidated_total > 0)) {
+                        if (data.consolidated && data.consolidated_total !== undefined) {
+                            // Show consolidated summary
+                            totalAmount.textContent = '$' + (data.consolidated_total || 0).toFixed(2);
+                            itemCount.textContent = data.success_count || 0;
+                            totalInfo.innerHTML = `
+                                <span class="consolidated-badge">CONSOLIDATED</span><br>
+                                <strong>Consolidated Total:</strong> $${(data.consolidated_total || 0).toFixed(2)}<br>
+                                <span style="font-size: 0.9em; opacity: 0.8;">
+                                    Individual Total: $${(data.individual_total || 0).toFixed(2)} | 
+                                    Savings: <strong class="savings-highlight">$${(data.savings || 0).toFixed(2)}</strong>
+                                </span>
+                            `;
+                            totalSummary.style.display = 'block';
+                        } else {
+                            // Show individual summary
+                            totalAmount.textContent = '$' + (data.total_all || 0).toFixed(2);
+                            itemCount.textContent = data.success_count || 0;
+                            totalInfo.textContent = `Total for ${data.success_count || 0} items`;
+                            totalSummary.style.display = 'block';
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function clearAll() {
+            document.getElementById('links').value = '';
+            clearResults();
+        }
+
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultsList').innerHTML = '';
+            document.getElementById('totalSummary').style.display = 'none';
+        }
+
+        // Update shipping option styling when selected
+        document.querySelectorAll('.shipping-option input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.shipping-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                if (this.checked) {
+                    this.closest('.shipping-option').classList.add('selected');
+                }
+            });
+        });
+        
+        // Initialize selected state
+        document.querySelector('.shipping-option input[type="radio"]:checked').dispatchEvent(new Event('change'));
+
+        // Allow Enter key to trigger calculation (Ctrl+Enter)
+        document.getElementById('links').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                calculateAll();
+            }
+        });
+    </script>
+</body>
+</html>
